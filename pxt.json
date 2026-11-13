@@ -1,0 +1,16 @@
+{
+    "name": "arcade-menu-ui",
+    "version": "1.0.0",
+    "description": "Create controller-driven menus, buttons and persistent settings in MakeCode Arcade.",
+    "dependencies": {
+        "device": "*"
+    },
+    "files": [
+        "main.ts",
+        "README.md"
+    ],
+    "supportedTargets": [
+        "arcade"
+    ],
+    "preferredEditor": "tsprj"
+}
