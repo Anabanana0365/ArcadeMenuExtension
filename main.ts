@@ -176,7 +176,12 @@ namespace arcadeMenu {
             let safeStep = entry.step > 0 ? entry.step : 1;
             applyEntryValue(activeMenu, index, entry.value + direction * safeStep, true);
         } else if (entry.type == EntryType.Choice) {
-            applyEntryValue(activeMenu, index, entry.value + direction, true);
+            if (entry.choices.length > 0) {
+                let nextValue = entry.value + direction;
+                if (nextValue < 0) nextValue = entry.choices.length - 1;
+                if (nextValue >= entry.choices.length) nextValue = 0;
+                applyEntryValue(activeMenu, index, nextValue, true);
+            }
         }
     }
 
@@ -195,7 +200,11 @@ namespace arcadeMenu {
         } else if (entry.type == EntryType.Toggle) {
             applyEntryValue(menu, index, entry.value > 0 ? 0 : 1, true);
         } else if (entry.type == EntryType.Choice) {
-            applyEntryValue(menu, index, entry.value + 1, true);
+            if (entry.choices.length > 0) {
+                let nextValue = entry.value + 1;
+                if (nextValue >= entry.choices.length) nextValue = 0;
+                applyEntryValue(menu, index, nextValue, true);
+            }
         }
     }
 
@@ -321,8 +330,7 @@ namespace arcadeMenu {
         let entry = new MenuEntry(label, EntryType.Toggle);
         entry.value = defaultValue ? 1 : 0;
         entry.storageKey = storageKey(menu, menu.items.length);
-        let savedValue = settings.readNumber(entry.storageKey);
-        if (savedValue != null) entry.value = savedValue > 0 ? 1 : 0;
+        entry.value = settings.readNumber(entry.storageKey, entry.value) > 0 ? 1 : 0;
         menu.items.push(entry);
     }
 
@@ -347,8 +355,7 @@ namespace arcadeMenu {
         entry.step = step;
         entry.value = clamp(initial, minimum, maximum);
         entry.storageKey = storageKey(menu, menu.items.length);
-        let savedValue = settings.readNumber(entry.storageKey);
-        if (savedValue != null) entry.value = clamp(savedValue, minimum, maximum);
+        entry.value = clamp(settings.readNumber(entry.storageKey, entry.value), minimum, maximum);
         menu.items.push(entry);
     }
 
@@ -366,11 +373,14 @@ namespace arcadeMenu {
         if (!menu) return;
         let entry = new MenuEntry(label, EntryType.Choice);
         entry.choices = options.split(",");
+        for (let i = 0; i < entry.choices.length; i++) {
+            entry.choices[i] = entry.choices[i].trim();
+            if (entry.choices[i].length == 0) entry.choices[i] = "Option " + (i + 1);
+        }
         if (entry.choices.length == 0) entry.choices.push("Default");
         entry.value = clamp(Math.round(defaultIndex), 0, entry.choices.length - 1);
         entry.storageKey = storageKey(menu, menu.items.length);
-        let savedValue = settings.readNumber(entry.storageKey);
-        if (savedValue != null) entry.value = clamp(Math.round(savedValue), 0, entry.choices.length - 1);
+        entry.value = clamp(Math.round(settings.readNumber(entry.storageKey, entry.value)), 0, entry.choices.length - 1);
         menu.items.push(entry);
     }
 
@@ -396,20 +406,34 @@ namespace arcadeMenu {
         closeMenuInternal(menu);
     }
 
-    /** Run code when an action button is selected. Index starts at zero. */
-    //% blockId=arcade_menu_on_button block="on button selected in $menu"
+    /**
+     * Run code when an action button is selected. Index starts at zero.
+     * @param menu The menu that owns the action button.
+     * @param index The zero-based index of the selected button.
+     * @param label The selected button's label.
+     */
+    //% blockId=arcade_menu_on_button block="on button selected $index $label in $menu"
     //% blockNamespace=arcadeMenu
-    //% draggableParameters
+    //% draggableParameters="reporter"
     //% weight=85 blockGap=8
+    //% param index.shadow=math_number index.defl=0
+    //% param label.shadow=text
     export function onButtonPressed(menu: Menu, handler: (index: number, label: string) => void): void {
         if (menu) menu.buttonHandler = handler;
     }
 
-    /** Run code when a toggle, slider, or choice changes. Toggle values are 0 or 1. */
-    //% blockId=arcade_menu_on_setting block="on setting changed in $menu"
+    /**
+     * Run code when a toggle, slider, or choice changes. Toggle values are 0 or 1.
+     * @param menu The menu that owns the setting.
+     * @param index The zero-based index of the changed item.
+     * @param value The new setting value.
+     */
+    //% blockId=arcade_menu_on_setting block="on setting changed $index $value in $menu"
     //% blockNamespace=arcadeMenu
-    //% draggableParameters
+    //% draggableParameters="reporter"
     //% weight=75 blockGap=8
+    //% param index.shadow=math_number index.defl=0
+    //% param value.shadow=math_number value.defl=0
     export function onSettingChanged(menu: Menu, handler: (index: number, value: number) => void): void {
         if (menu) menu.settingHandler = handler;
     }
@@ -417,7 +441,6 @@ namespace arcadeMenu {
     /** Run code when a menu is closed. */
     //% blockId=arcade_menu_on_closed block="on menu closed $menu"
     //% blockNamespace=arcadeMenu
-    //% draggableParameters
     //% weight=65 blockGap=8
     export function onMenuClosed(menu: Menu, handler: () => void): void {
         if (menu) menu.closedHandler = handler;

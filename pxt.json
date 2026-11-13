@@ -1,7 +1,7 @@
 {
     "name": "arcade-menu-ui",
-    "version": "1.0.0",
-    "description": "Create controller-driven menus, buttons and persistent settings in MakeCode Arcade.",
+    "version": "1.0.1",
+    "description": "Controller-driven menus, action buttons, and persistent settings for MakeCode Arcade.",
     "dependencies": {
         "device": "*"
     },

@@ -7,10 +7,10 @@ A menu and settings extension for Microsoft MakeCode Arcade.
 - Create menus with a title.
 - Add action buttons, ON/OFF toggles, numeric sliders, and choice lists.
 - Navigate with the D-pad / arrow keys.
-- Press **A** to activate a button or toggle; use **left/right** to change toggles, sliders, and choices.
+- Press **A** to activate a button or toggle; use **left/right** to change toggles, sliders, and choices. Choice lists wrap around at either end.
 - Press **B** to close the menu.
-- React to button selections, setting changes, and menu closing with event blocks.
-- Save toggle, slider, and choice values using Arcade's settings storage.
+- React to button selections, setting changes, and menu closing with event blocks. Button and setting event parameters are exposed as draggable reporter variables (index, label, and value).
+- Save toggle, slider, and choice values using Arcade's settings storage, while correctly respecting each item's configured default on first run.
 - Change the menu palette, title, item labels, and values while the game is running.
 - Scroll automatically when there are more than five menu items.
 
